@@ -9,6 +9,7 @@ This is a cleaned version of my Obsidian vault setup to organize my tasks for my
   - [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) – query notes like a database  
   - [Calendar](https://github.com/liamcain/obsidian-calendar-plugin) – calendar view for daily/weekly notes  
   - [Periodic Notes](https://github.com/liamcain/obsidian-periodic-notes) – structured daily/weekly/monthly logs
+  - [Tasks]([https://github.com/liamcain/obsidian-periodic-notes](https://github.com/obsidian-tasks-group/obsidian-tasks)) – track tasks across your vault
 
 ## 📂 Structure
 
