@@ -5,12 +5,10 @@ This is a cleaned version of my Obsidian vault setup to organize my tasks for my
 1. Download this repository as a ZIP (`Code > Download ZIP`) or clone it.
 2. Open the folder in Obsidian as a vault.
 3. Install the plugins listed below.
-
-##🔌Plugins
-- [Templater](https://github.com/SilentVoid13/Templater) – dynamic note templates  
-- [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) – query notes like a database  
-- [Calendar](https://github.com/liamcain/obsidian-calendar-plugin) – calendar view for daily/weekly notes  
-- [Periodic Notes](https://github.com/liamcain/obsidian-periodic-notes) – structured daily/weekly/monthly logs
+  - [Templater](https://github.com/SilentVoid13/Templater) – dynamic note templates  
+  - [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) – query notes like a database  
+  - [Calendar](https://github.com/liamcain/obsidian-calendar-plugin) – calendar view for daily/weekly notes  
+  - [Periodic Notes](https://github.com/liamcain/obsidian-periodic-notes) – structured daily/weekly/monthly logs
 
 ## 📂 Structure
 
