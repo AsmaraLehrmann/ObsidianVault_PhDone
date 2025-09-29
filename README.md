@@ -1,5 +1,5 @@
 # ObsidianVault_PhDone
-This is a cleaned version of my Obsidian vault setup to organize my tasks for my PhD. It was designed as a reusable to-do list template.
+This is a cleaned version of my Obsidian vault setup to organize my tasks for my PhD. It was designed as a reusable to-do list template. Created with the assistance of ChatGPT-5.
 
 ## How to use
 1. Download this repository as a ZIP (`Code > Download ZIP`) or clone it.
