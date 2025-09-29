@@ -14,7 +14,13 @@ This is a cleaned version of my Obsidian vault setup to organize my tasks for my
  
 ## 📂 Structure
 - `Dissertation Station/` – Accountability dashboard with this week's tasks, how many weeks left until submission, and how many weeks behind you are on your tasks.
-- `Weeks/` – List of ALL tasks that need to be completed to complete your PhD by week. You can change the start and end date   
+<img width="971" height="986" alt="image" src="https://github.com/user-attachments/assets/c799fcb7-6930-41be-9a9b-c1eded1468ad" />
+
+- `Weeks/` – List of ALL tasks that need to be completed to complete your PhD by week. You can change the start and end date
+<img width="992" height="719" alt="image" src="https://github.com/user-attachments/assets/b4c461f6-0c6e-43b9-ae69-a352d7f2bd53" />
+
 - `Planner/` – Tasks by day, including the last-minute tasks that need to be added to your list this week.
+<img width="996" height="678" alt="image" src="https://github.com/user-attachments/assets/e74007b6-7a14-4eb2-9a29-3cd5de5970d9" />
+
 - `Completed/` – automatically archives completed tasks
-- 
+
