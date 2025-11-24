@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhDone Task Manager - Direct Save</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .folder-info {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .folder-info.show {
+            display: block;
+        }
+        
+        .folder-info strong {
+            color: #0277bd;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #545b62;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.success:hover {
+            background: #218838;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        .weeks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .week-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .week-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .week-dates {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .task-list {
+            min-height: 100px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .task-list.drag-over {
+            background: #e3f2fd;
+            border: 2px dashed #007bff;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: move;
+            border-left: 3px solid #007bff;
+            transition: all 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        
+        .task-item.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+        
+        .task-item.completed {
+            opacity: 0.6;
+            border-left-color: #28a745;
+        }
+        
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+        }
+        
+        .task-checkbox {
+            margin-right: 8px;
+        }
+        
+        .task-tags {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e3f2fd;
+            color: #0277bd;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
+        .date-tag {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .task-count {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filter-section input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+            font-size: 14px;
+        }
+        
+        .empty-week {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .status-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .status-message.error {
+            background: #dc3545;
+        }
+        
+        .status-message.info {
+            background: #17a2b8;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .changes-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #ffc107;
+            color: #000;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .changes-indicator.no-changes {
+            background: #28a745;
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .modal-content p {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 PhDone Task Manager</h1>
+            <p class="subtitle">Drag and drop tasks between weeks • Direct save to your Obsidian vault</p>
+            
+            <div class="folder-info" id="folderInfo">
+                <strong>📁 Saving to:</strong> <span id="folderPath">Not selected</span>
+            </div>
+            
+            <div class="controls">
+                <button onclick="selectFolder()" class="success">📂 Select Weeks Folder</button>
+                <button onclick="loadWeeksFromFolder()" id="loadBtn" disabled>🔄 Load Weeks</button>
+                <button onclick="saveAllChanges()" id="saveBtn" class="success" disabled>💾 Save All Changes</button>
+                <button onclick="toggleCompletedTasks()" class="secondary">👁️ Toggle Completed</button>
+                <span id="changesIndicator"></span>
+            </div>
+        </header>
+        
+        <div class="filter-section">
+            <input type="text" id="filterInput" placeholder="Filter tasks by text or tags..." oninput="filterTasks()">
+        </div>
+        
+        <div id="weeksContainer" class="weeks-grid"></div>
+    </div>
+    
+    <div id="statusMessage" class="status-message"></div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm Save</h2>
+            <p>This will overwrite your week files in the selected folder. Make sure you have your vault backed up with git!</p>
+            <p><strong>Files to be saved:</strong> <span id="fileCount"></span></p>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="secondary">Cancel</button>
+                <button onclick="confirmSave()" class="success">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let weeksData = [];
+        let hideCompleted = false;
+        let directoryHandle = null;
+        let fileHandles = {};
+        let hasUnsavedChanges = false;
+        
+        // Check for File System Access API support
+        const supportsFileSystemAccess = 'showDirectoryPicker' in window;
+        
+        if (!supportsFileSystemAccess) {
+            alert('Your browser does not support the File System Access API. Please use Chrome, Edge, or another Chromium-based browser.');
+        }
+        
+        async function selectFolder() {
+            try {
+                directoryHandle = await window.showDirectoryPicker({
+                    mode: 'readwrite',
+                    startIn: 'documents'
+                });
+                
+                document.getElementById('folderPath').textContent = directoryHandle.name;
+                document.getElementById('folderInfo').classList.add('show');
+                document.getElementById('loadBtn').disabled = false;
+                
+                showStatusMessage(`Selected folder: ${directoryHandle.name}`, 'success');
+                
+                // Auto-load weeks
+                await loadWeeksFromFolder();
+                
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    showStatusMessage('Error selecting folder: ' + err.message, 'error');
+                }
+            }
+        }
+        
+        async function loadWeeksFromFolder() {
+            if (!directoryHandle) {
+                showStatusMessage('Please select a folder first', 'error');
+                return;
+            }
+            
+            try {
+                weeksData = [];
+                fileHandles = {};
+                
+                // Read all week files
+                for await (const entry of directoryHandle.values()) {
+                    if (entry.kind === 'file' && entry.name.match(/^week\d+\.md$/)) {
+                        const fileHandle = await directoryHandle.getFileHandle(entry.name);
+                        const file = await fileHandle.getFile();
+                        const content = await file.text();
+                        
+                        const weekMatch = entry.name.match(/week(\d+)/);
+                        if (weekMatch) {
+                            const weekNum = parseInt(weekMatch[1]);
+                            const weekData = parseWeekFile(content, weekNum);
+                            weeksData.push(weekData);
+                            fileHandles[weekNum] = fileHandle;
+                        }
+                    }
+                }
+                
+                weeksData.sort((a, b) => a.week - b.week);
+                renderWeeks();
+                
+                hasUnsavedChanges = false;
+                updateChangesIndicator();
+                document.getElementById('saveBtn').disabled = false;
+                
+                showStatusMessage(`Loaded ${weeksData.length} weeks successfully!`, 'success');
+                
+            } catch (err) {
+                showStatusMessage('Error loading weeks: ' + err.message, 'error');
+            }
+        }
+        
+        function parseWeekFile(content, weekNum) {
+            const lines = content.split('\n');
+            const tasks = [];
+            let inTaskSection = false;
+            let metadata = { week: weekNum, start: '', end: '' };
+            
+            for (let line of lines) {
+                if (line.startsWith('start:')) {
+                    metadata.start = line.split(':')[1].trim();
+                }
+                if (line.startsWith('end:')) {
+                    metadata.end = line.split(':')[1].trim();
+                }
+                
+                if (line.includes('## Tasks')) {
+                    inTaskSection = true;
+                    continue;
+                }
+                
+                if (line.startsWith('## ') && !line.includes('Tasks')) {
+                    inTaskSection = false;
+                }
+                
+                if (inTaskSection && (line.trim().startsWith('- [ ]') || line.trim().startsWith('- [x]'))) {
+                    const completed = line.includes('- [x]');
+                    let text = line.replace(/^- \[.\] /, '').trim();
+                    
+                    const tags = [];
+                    const tagRegex = /#(\w+)/g;
+                    let match;
+                    while ((match = tagRegex.exec(text)) !== null) {
+                        tags.push(match[1]);
+                    }
+                    
+                    const dateRegex = /📅 (\d{4}-\d{2}-\d{2})/;
+                    const dateMatch = text.match(dateRegex);
+                    const dueDate = dateMatch ? dateMatch[1] : null;
+                    
+                    text = text.replace(/#\w+/g, '').replace(/📅 \d{4}-\d{2}-\d{2}/, '').trim();
+                    
+                    if (text) {
+                        tasks.push({
+                            text,
+                            completed,
+                            tags,
+                            dueDate,
+                            originalLine: line
+                        });
+                    }
+                }
+            }
+            
+            return { ...metadata, tasks };
+        }
+        
+        function createTaskElement(task, weekNum) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = `task-item ${task.completed ? 'completed' : ''}`;
+            taskDiv.draggable = true;
+            taskDiv.dataset.taskText = task.text;
+            taskDiv.dataset.weekNum = weekNum;
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'task-checkbox';
+            checkbox.checked = task.completed;
+            checkbox.onclick = (e) => {
+                e.stopPropagation();
+                toggleTaskCompletion(weekNum, task);
+            };
+            
+            const textSpan = document.createElement('span');
+            textSpan.className = 'task-text';
+            textSpan.textContent = task.text;
+            
+            taskDiv.appendChild(checkbox);
+            taskDiv.appendChild(textSpan);
+            
+            if (task.tags.length > 0 || task.dueDate) {
+                const tagsDiv = document.createElement('div');
+                tagsDiv.className = 'task-tags';
+                
+                task.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'tag';
+                    tagSpan.textContent = `#${tag}`;
+                    tagsDiv.appendChild(tagSpan);
+                });
+                
+                if (task.dueDate) {
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'tag date-tag';
+                    dateSpan.textContent = `📅 ${task.dueDate}`;
+                    tagsDiv.appendChild(dateSpan);
+                }
+                
+                taskDiv.appendChild(tagsDiv);
+            }
+            
+            taskDiv.addEventListener('dragstart', handleDragStart);
+            taskDiv.addEventListener('dragend', handleDragEnd);
+            
+            return taskDiv;
+        }
+        
+        function renderWeeks() {
+            const container = document.getElementById('weeksContainer');
+            container.innerHTML = '';
+            
+            if (weeksData.length === 0) {
+                container.innerHTML = '<div class="empty-week">No weeks loaded. Click "Select Weeks Folder" to get started.</div>';
+                return;
+            }
+            
+            weeksData.forEach(week => {
+                const weekCard = document.createElement('div');
+                weekCard.className = 'week-card';
+                weekCard.dataset.weekNum = week.week;
+                
+                const header = document.createElement('div');
+                header.className = 'week-header';
+                
+                const titleDiv = document.createElement('div');
+                const title = document.createElement('div');
+                title.className = 'week-title';
+                title.textContent = `Week ${week.week}`;
+                
+                const dates = document.createElement('div');
+                dates.className = 'week-dates';
+                dates.textContent = `${week.start} to ${week.end}`;
+                
+                titleDiv.appendChild(title);
+                titleDiv.appendChild(dates);
+                
+                const count = document.createElement('span');
+                count.className = 'task-count';
+                const visibleTasks = week.tasks.filter(t => !hideCompleted || !t.completed);
+                count.textContent = `${visibleTasks.length} tasks`;
+                
+                header.appendChild(titleDiv);
+                header.appendChild(count);
+                
+                const taskList = document.createElement('div');
+                taskList.className = 'task-list';
+                taskList.dataset.weekNum = week.week;
+                
+                taskList.addEventListener('dragover', handleDragOver);
+                taskList.addEventListener('drop', handleDrop);
+                taskList.addEventListener('dragleave', handleDragLeave);
+                
+                week.tasks.forEach(task => {
+                    if (!hideCompleted || !task.completed) {
+                        taskList.appendChild(createTaskElement(task, week.week));
+                    }
+                });
+                
+                if (week.tasks.length === 0 || (hideCompleted && visibleTasks.length === 0)) {
+                    taskList.innerHTML = '<div class="empty-week">No tasks this week</div>';
+                }
+                
+                weekCard.appendChild(header);
+                weekCard.appendChild(taskList);
+                container.appendChild(weekCard);
+            });
+        }
+        
+        let draggedElement = null;
+        
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+        }
+        
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+            return false;
+        }
+        
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedElement) {
+                const sourceWeek = parseInt(draggedElement.dataset.weekNum);
+                const targetWeek = parseInt(e.currentTarget.dataset.weekNum);
+                const taskText = draggedElement.dataset.taskText;
+                
+                if (sourceWeek !== targetWeek) {
+                    moveTask(sourceWeek, targetWeek, taskText);
+                    showStatusMessage(`Moved task to Week ${targetWeek}`, 'success');
+                }
+            }
+            
+            return false;
+        }
+        
+        function moveTask(fromWeek, toWeek, taskText) {
+            const sourceWeekData = weeksData.find(w => w.week === fromWeek);
+            const targetWeekData = weeksData.find(w => w.week === toWeek);
+            
+            if (!sourceWeekData || !targetWeekData) return;
+            
+            const taskIndex = sourceWeekData.tasks.findIndex(t => t.text === taskText);
+            if (taskIndex === -1) return;
+            
+            const task = sourceWeekData.tasks[taskIndex];
+            sourceWeekData.tasks.splice(taskIndex, 1);
+            targetWeekData.tasks.push(task);
+            
+            hasUnsavedChanges = true;
+            updateChangesIndicator();
+            renderWeeks();
+        }
+        
+        function toggleTaskCompletion(weekNum, task) {
+            task.completed = !task.completed;
+            hasUnsavedChanges = true;
+            updateChangesIndicator();
+            renderWeeks();
+        }
+        
+        function toggleCompletedTasks() {
+            hideCompleted = !hideCompleted;
+            renderWeeks();
+        }
+        
+        function filterTasks() {
+            const filterText = document.getElementById('filterInput').value.toLowerCase();
+            const taskItems = document.querySelectorAll('.task-item');
+            
+            taskItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(filterText)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        function updateChangesIndicator() {
+            const indicator = document.getElementById('changesIndicator');
+            if (hasUnsavedChanges) {
+                indicator.innerHTML = '<span class="changes-indicator">⚠️ Unsaved Changes</span>';
+            } else {
+                indicator.innerHTML = '<span class="changes-indicator no-changes">✓ All Saved</span>';
+            }
+        }
+        
+        function saveAllChanges() {
+            const changedWeeks = weeksData.length;
+            document.getElementById('fileCount').textContent = `${changedWeeks} week files`;
+            document.getElementById('confirmModal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+        
+        async function confirmSave() {
+            closeModal();
+            
+            if (!directoryHandle) {
+                showStatusMessage('No folder selected!', 'error');
+                return;
+            }
+            
+            try {
+                let savedCount = 0;
+                
+                for (const week of weeksData) {
+                    const content = generateWeekFile(week);
+                    const fileName = `week${String(week.week).padStart(2, '0')}.md`;
+                    
+                    // Get or create file handle
+                    let fileHandle;
+                    if (fileHandles[week.week]) {
+                        fileHandle = fileHandles[week.week];
+                    } else {
+                        fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+                    }
+                    
+                    // Write to file
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                    
+                    savedCount++;
+                }
+                
+                hasUnsavedChanges = false;
+                updateChangesIndicator();
+                showStatusMessage(`✓ Saved ${savedCount} week files successfully!`, 'success');
+                
+            } catch (err) {
+                showStatusMessage('Error saving files: ' + err.message, 'error');
+            }
+        }
+        
+        function generateWeekFile(week) {
+            let content = `---\nweek: ${week.week}\nstart: ${week.start}\nend: ${week.end}\n---\n`;
+            content += `# Week ${week.week}\n\n## Tasks\n`;
+            
+            week.tasks.forEach(task => {
+                const checkbox = task.completed ? '[x]' : '[ ]';
+                let taskLine = `- ${checkbox} ${task.text}`;
+                
+                if (task.tags.length > 0) {
+                    taskLine += ' ' + task.tags.map(t => `#${t}`).join(' ');
+                }
+                
+                if (task.dueDate) {
+                    taskLine += ` 📅 ${task.dueDate}`;
+                }
+                
+                content += taskLine + '\n';
+            });
+            
+            content += '\n## Notes\n- Context, goals, and focus for this week.\n';
+            
+            return content;
+        }
+        
+        function showStatusMessage(message, type = 'success') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message show ${type}`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Warn before leaving if there are unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateChangesIndicator();
+        });
+    </script>
+</body>
+</html>
